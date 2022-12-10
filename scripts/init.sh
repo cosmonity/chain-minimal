@@ -14,5 +14,3 @@ $MINID_BIN genesis add-genesis-account bob 1000mini --keyring-backend test
 # create default validator
 $MINID_BIN genesis gentx alice 1000000mini --chain-id demo
 $MINID_BIN genesis collect-gentxs
-# update config
-sed -c -i "s/\(minimum-gas-prices *= *\).*/\1\"0mini\"/" ~/.minid/config/app.toml
