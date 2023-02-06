@@ -7,7 +7,7 @@ go 1.19
 replace github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.7.0
 
 require (
-	cosmossdk.io/api v0.2.6
+	cosmossdk.io/api v0.3.0
 	cosmossdk.io/core v0.5.1
 	cosmossdk.io/depinject v1.0.0-alpha.3
 	cosmossdk.io/tools/rosetta v0.2.0
