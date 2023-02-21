@@ -7,7 +7,7 @@ go 1.19
 replace github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.7.0
 
 require (
-	cosmossdk.io/api v0.2.6
+	cosmossdk.io/api v0.3.1
 	cosmossdk.io/core v0.5.1
 	cosmossdk.io/depinject v1.0.0-alpha.3
 	cosmossdk.io/tools/rosetta v0.2.0
@@ -31,7 +31,7 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/apd/v2 v2.0.2 // indirect
 	github.com/confio/ics23/go v0.9.0 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
@@ -122,11 +122,11 @@ require (
 	golang.org/x/crypto v0.4.0 // indirect
 	golang.org/x/exp v0.0.0-20221019170559-20944726eadf // indirect
 	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/term v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
-	google.golang.org/genproto v0.0.0-20230125152338-dcaf20b6aeaa // indirect
-	google.golang.org/grpc v1.52.3 // indirect
+	google.golang.org/genproto v0.0.0-20230202175211-008b39050e57 // indirect
+	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
