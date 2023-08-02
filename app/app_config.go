@@ -64,18 +64,9 @@ var (
 					BeginBlockers: []string{
 						distrtypes.ModuleName,
 						stakingtypes.ModuleName,
-						authtypes.ModuleName,
-						banktypes.ModuleName,
-						genutiltypes.ModuleName,
-						consensustypes.ModuleName,
 					},
 					EndBlockers: []string{
 						stakingtypes.ModuleName,
-						authtypes.ModuleName,
-						banktypes.ModuleName,
-						distrtypes.ModuleName,
-						genutiltypes.ModuleName,
-						consensustypes.ModuleName,
 					},
 					OverrideStoreKeys: []*runtimev1alpha1.StoreKeyConfig{
 						{
@@ -92,7 +83,6 @@ var (
 						distrtypes.ModuleName,
 						stakingtypes.ModuleName,
 						genutiltypes.ModuleName,
-						consensustypes.ModuleName,
 					},
 				}),
 			},
