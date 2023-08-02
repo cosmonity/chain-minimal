@@ -83,6 +83,7 @@ var (
 						distrtypes.ModuleName,
 						stakingtypes.ModuleName,
 						genutiltypes.ModuleName,
+						consensustypes.ModuleName, // TODO(@julienrbrt) To be removed after https://github.com/cosmos/cosmos-sdk/pull/17262
 					},
 				}),
 			},

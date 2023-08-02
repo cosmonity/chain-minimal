@@ -215,7 +215,12 @@ func txCommand() *cobra.Command {
 // newApp is an appCreator
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts servertypes.AppOptions) servertypes.Application {
 	baseappOptions := server.DefaultBaseappOptions(appOpts)
-	return app.NewMiniApp(logger, db, traceStore, true, appOpts, baseappOptions...)
+	app, err := app.NewMiniApp(logger, db, traceStore, true, appOpts, baseappOptions...)
+	if err != nil {
+		panic(err)
+	}
+
+	return app
 }
 
 // appExport creates a new app (optionally at a given height) and exports state.
@@ -229,7 +234,10 @@ func appExport(
 	appOpts servertypes.AppOptions,
 	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
-	var miniApp *app.MiniApp
+	var (
+		miniApp *app.MiniApp
+		err     error
+	)
 
 	// this check is necessary as we use the flag in x/upgrade.
 	// we can exit more gracefully by checking the flag here.
@@ -248,13 +256,19 @@ func appExport(
 	appOpts = viperAppOpts
 
 	if height != -1 {
-		miniApp = app.NewMiniApp(logger, db, traceStore, false, appOpts)
+		miniApp, err = app.NewMiniApp(logger, db, traceStore, false, appOpts)
+		if err != nil {
+			return servertypes.ExportedApp{}, err
+		}
 
 		if err := miniApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		miniApp = app.NewMiniApp(logger, db, traceStore, true, appOpts)
+		miniApp, err = app.NewMiniApp(logger, db, traceStore, true, appOpts)
+		if err != nil {
+			return servertypes.ExportedApp{}, err
+		}
 	}
 
 	return miniApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)

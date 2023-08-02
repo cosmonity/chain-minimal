@@ -74,14 +74,14 @@ func NewMiniApp(
 	loadLatest bool,
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
-) *MiniApp {
+) (*MiniApp, error) {
 	var (
 		app        = &MiniApp{}
 		appBuilder *runtime.AppBuilder
 	)
 
-	if err := depinject.Inject(AppConfig,
-		depinject.Supply(logger, appOpts),
+	if err := depinject.Inject(
+		depinject.Configs(AppConfig, depinject.Supply(logger, appOpts)),
 		&appBuilder,
 		&app.appCodec,
 		&app.legacyAmino,
@@ -93,14 +93,14 @@ func NewMiniApp(
 		&app.DistrKeeper,
 		&app.ConsensusParamsKeeper,
 	); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
 
 	// register streaming services
 	if err := app.RegisterStreamingServices(appOpts, app.kvStoreKeys()); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	/****  Module Options ****/
@@ -111,10 +111,10 @@ func NewMiniApp(
 	app.sm.RegisterStoreDecoders()
 
 	if err := app.Load(loadLatest); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return app
+	return app, nil
 }
 
 // LegacyAmino returns MiniApp's amino codec.
