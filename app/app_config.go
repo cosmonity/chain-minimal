@@ -11,14 +11,24 @@ import (
 	stakingmodulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
 	txconfigv1 "cosmossdk.io/api/cosmos/tx/config/v1"
 	"cosmossdk.io/core/appconfig"
+	"cosmossdk.io/depinject"
 
+	"github.com/cosmos/cosmos-sdk/types/module"
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	_ "github.com/cosmos/cosmos-sdk/x/auth"         // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/bank"         // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/consensus"    // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/distribution" // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/mint"         // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/staking"      // import for side-effects
 )
 
 var (
@@ -41,7 +51,7 @@ var (
 	}
 
 	// application configuration (used by depinject)
-	AppConfig = appconfig.Compose(&appv1alpha1.Config{
+	AppConfig = depinject.Configs(appconfig.Compose(&appv1alpha1.Config{
 		Modules: []*appv1alpha1.ModuleConfig{
 			{
 				Name: "runtime",
@@ -120,5 +130,11 @@ var (
 				Config: appconfig.WrapAny(&consensusmodulev1.Module{}),
 			},
 		},
-	})
+	}),
+		depinject.Supply(
+			// supply custom module basics
+			map[string]module.AppModuleBasic{
+				genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+			},
+		))
 )

@@ -5,25 +5,31 @@ import (
 	"io"
 	"os"
 
-	dbm "github.com/cometbft/cometbft-db"
 	cmtcfg "github.com/cometbft/cometbft/config"
-	"github.com/cometbft/cometbft/libs/log"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/depinject"
+	"cosmossdk.io/log"
+	confixcmd "cosmossdk.io/tools/confix/cmd"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/client/pruning"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/client/snapshot"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -36,10 +42,12 @@ import (
 // main function.
 func NewRootCmd() *cobra.Command {
 	var (
-		interfaceRegistry codectypes.InterfaceRegistry
-		appCodec          codec.Codec
-		txConfig          client.TxConfig
-		legacyAmino       *codec.LegacyAmino
+		interfaceRegistry  codectypes.InterfaceRegistry
+		appCodec           codec.Codec
+		txConfig           client.TxConfig
+		legacyAmino        *codec.LegacyAmino
+		autoCliOpts        autocli.AppOptions
+		moduleBasicManager module.BasicManager
 	)
 
 	if err := depinject.Inject(depinject.Configs(app.AppConfig, depinject.Supply(log.NewNopLogger())),
@@ -47,6 +55,8 @@ func NewRootCmd() *cobra.Command {
 		&appCodec,
 		&txConfig,
 		&legacyAmino,
+		&autoCliOpts,
+		&moduleBasicManager,
 	); err != nil {
 		panic(err)
 	}
@@ -91,7 +101,11 @@ func NewRootCmd() *cobra.Command {
 		},
 	}
 
-	initRootCmd(rootCmd, txConfig, interfaceRegistry, appCodec)
+	initRootCmd(rootCmd, txConfig, interfaceRegistry, appCodec, moduleBasicManager)
+
+	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
+		panic(err)
+	}
 
 	return rootCmd
 }
@@ -101,14 +115,17 @@ func initRootCmd(
 	txConfig client.TxConfig,
 	interfaceRegistry codectypes.InterfaceRegistry,
 	appCodec codec.Codec,
+	basicManager module.BasicManager,
 ) {
 	cfg := sdk.GetConfig()
 	cfg.Seal()
 
 	rootCmd.AddCommand(
-		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
+		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
 		debug.Cmd(),
-		config.Cmd(),
+		confixcmd.ConfigCommand(),
+		pruning.Cmd(newApp, app.DefaultNodeHome),
+		snapshot.Cmd(newApp),
 	)
 
 	server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
@@ -116,10 +133,10 @@ func initRootCmd(
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
-		genutilcli.GenesisCoreCommand(txConfig, app.ModuleBasics, app.DefaultNodeHome),
+		genutilcli.Commands(txConfig, basicManager, app.DefaultNodeHome),
 		queryCommand(),
 		txCommand(),
-		keys.Commands(app.DefaultNodeHome),
+		keys.Commands(),
 	)
 }
 
@@ -138,15 +155,13 @@ func queryCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		authcmd.GetAccountCmd(),
 		rpc.ValidatorCommand(),
-		rpc.BlockCommand(),
+		server.QueryBlockCmd(),
 		authcmd.QueryTxsByEventsCmd(),
+		server.QueryBlocksCmd(),
 		authcmd.QueryTxCmd(),
+		server.QueryBlockResultsCmd(),
 	)
-
-	app.ModuleBasics.AddQueryCommands(cmd)
-	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
 }
@@ -171,9 +186,6 @@ func txCommand() *cobra.Command {
 		authcmd.GetDecodeCommand(),
 		authcmd.GetAuxToFeeCommand(),
 	)
-
-	app.ModuleBasics.AddTxCommands(cmd)
-	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
 }
