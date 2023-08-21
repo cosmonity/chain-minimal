@@ -1,6 +1,7 @@
 module github.com/julienrbrt/chain-minimal
 
-go 1.19
+go 1.21
+
 toolchain go1.21.0
 
 replace (
