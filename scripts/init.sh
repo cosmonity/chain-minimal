@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 
 rm -r ~/.minid || true
-MINID_BIN=$(which minid)
+# Get the value of GOPATH
+GOBIN=$(go env GOPATH)/bin
+
+# Check if minid exists in the GOBIN directory
+MINID_BIN=$(which $GOBIN/minid)
+
+if [ -n "$MINID_BIN" ]; then
+    echo "minid binary found at: $MINID_BIN"
+else
+    echo "minid binary not found in $GOBIN directory."
+fi
+
 # configure minid
 $MINID_BIN config set client chain-id demo
 $MINID_BIN config set client keyring-backend test
