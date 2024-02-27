@@ -23,7 +23,7 @@ require (
 	cosmossdk.io/store v1.0.2
 	cosmossdk.io/tools/confix v0.1.1
 	github.com/cometbft/cometbft v0.38.5
-	github.com/cosmos/cosmos-db v1.0.0
+	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/cosmos-sdk v0.50.4
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
