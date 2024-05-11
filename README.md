@@ -9,6 +9,14 @@ It uses the least modules possible and is intended to be used as a starting poin
 
 In addition to learn how to build a chain thanks to `minid`, you can as well directly run `minid`.
 
+### Prerequisites
+
+* Install Go as described [here](https://go.dev/doc/install).
+* Add `GOPATH` to your `PATH`:
+  * `export PATH="$PATH:/usr/local/go/bin:$(/usr/local/go/bin/go env GOPATH)/bin"`
+
+You are all set!
+
 ### Installation
 
 Install and run `minid`:
@@ -20,6 +28,11 @@ make install # install the minid binary
 make init # initialize the chain
 minid start # start the chain
 ```
+
+### Troubleshoot
+
+After running `make install`, verify `minid` has been installed by doing `which minid`.
+If `minid` is not found, verify that your `$PATH` is configured correctly.
 
 ## Useful links
 
