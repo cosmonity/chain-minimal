@@ -14,7 +14,7 @@ replace (
 
 require (
 	cosmossdk.io/api v0.7.5
-	cosmossdk.io/client/v2 v2.0.0-beta.1
+	cosmossdk.io/client/v2 v2.0.0-beta.2
 	cosmossdk.io/core v0.11.0
 	cosmossdk.io/depinject v1.0.0-alpha.4
 	cosmossdk.io/errors v1.0.1
@@ -54,7 +54,7 @@ require (
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogogateway v1.2.0 // indirect
-	github.com/cosmos/gogoproto v1.4.12 // indirect
+	github.com/cosmos/gogoproto v1.5.0 // indirect
 	github.com/cosmos/iavl v1.1.2 // indirect
 	github.com/cosmos/ics23/go v0.10.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.13.3 // indirect
