@@ -74,7 +74,7 @@ type MiniApp struct {
 
 func init() {
 	var err error
-	// clienthelpers.EnvPrefix = "MINI"
+	clienthelpers.EnvPrefix = "MINI"
 	DefaultNodeHome, err = clienthelpers.GetNodeHomeDirectory(".minid")
 	if err != nil {
 		panic(err)
