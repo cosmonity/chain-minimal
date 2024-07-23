@@ -30,6 +30,7 @@ import (
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
+	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
 	_ "cosmossdk.io/api/cosmos/tx/config/v1"          // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/auth"           // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
@@ -86,6 +87,7 @@ func AppConfig() depinject.Config {
 	return depinject.Configs(
 		appconfig.LoadYAML(AppConfigYAML),
 		depinject.Supply(
+			&appv1alpha1.Config{}, // hack until https://github.com/cosmos/cosmos-sdk/pull/21042
 			// supply custom module basics
 			map[string]module.AppModuleBasic{
 				genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
