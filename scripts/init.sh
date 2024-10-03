@@ -15,8 +15,8 @@ fi
 # configure minid
 $MINID_BIN config set client chain-id demo
 $MINID_BIN config set client keyring-backend test
-$MINID_BIN keys add alice
-$MINID_BIN keys add bob
+$MINID_BIN keys add alice --indiscreet
+$MINID_BIN keys add bob --indiscreet
 $MINID_BIN init test --chain-id demo --default-denom mini
 # update genesis
 $MINID_BIN genesis add-genesis-account alice 10000000mini --keyring-backend test

@@ -5,6 +5,8 @@ It uses the least modules possible and is intended to be used as a starting poin
 
 `Minid` uses the **latest** version of the [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk).
 
+> This is an example module for the v0.52.x Cosmos SDK. Looking for the v0.50.x example? Check the [v0.50.x](https://github.com/cosmosregistry/chain-minimal/tree/v0.50.x) branch.
+
 ## How to use
 
 In addition to learn how to build a chain thanks to `minid`, you can as well directly run `minid`.

@@ -7,7 +7,11 @@ import (
 	cmtcfg "github.com/cometbft/cometbft/config"
 	"github.com/spf13/cobra"
 
+	authv1 "cosmossdk.io/api/cosmos/auth/module/v1"
+	stakingv1 "cosmossdk.io/api/cosmos/staking/module/v1"
 	"cosmossdk.io/client/v2/autocli"
+	"cosmossdk.io/core/address"
+	"cosmossdk.io/core/registry"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
 
@@ -29,9 +33,9 @@ import (
 // main function.
 func NewRootCmd() *cobra.Command {
 	var (
-		autoCliOpts        autocli.AppOptions
-		moduleBasicManager module.BasicManager
-		clientCtx          client.Context
+		autoCliOpts   autocli.AppOptions
+		moduleManager *module.Manager
+		clientCtx     client.Context
 	)
 
 	if err := depinject.Inject(
@@ -44,7 +48,7 @@ func NewRootCmd() *cobra.Command {
 			),
 		),
 		&autoCliOpts,
-		&moduleBasicManager,
+		&moduleManager,
 		&clientCtx,
 	); err != nil {
 		panic(err)
@@ -86,7 +90,7 @@ func NewRootCmd() *cobra.Command {
 		},
 	}
 
-	initRootCmd(rootCmd, clientCtx.TxConfig, moduleBasicManager)
+	initRootCmd(rootCmd, moduleManager)
 
 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
 		panic(err)
@@ -99,16 +103,33 @@ func ProvideClientContext(
 	appCodec codec.Codec,
 	interfaceRegistry codectypes.InterfaceRegistry,
 	txConfigOpts tx.ConfigOptions,
-	legacyAmino *codec.LegacyAmino,
+	legacyAmino registry.AminoRegistrar,
+	addressCodec address.Codec,
+	validatorAddressCodec address.ValidatorAddressCodec,
+	consensusAddressCodec address.ConsensusAddressCodec,
+	authConfig *authv1.Module,
+	stakingConfig *stakingv1.Module,
 ) client.Context {
+	var err error
+
+	amino, ok := legacyAmino.(*codec.LegacyAmino)
+	if !ok {
+		panic("ProvideClientContext requires a *codec.LegacyAmino instance")
+	}
+
 	clientCtx := client.Context{}.
 		WithCodec(appCodec).
 		WithInterfaceRegistry(interfaceRegistry).
-		WithLegacyAmino(legacyAmino).
+		WithLegacyAmino(amino).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
+		WithAddressCodec(addressCodec).
+		WithValidatorAddressCodec(validatorAddressCodec).
+		WithConsensusAddressCodec(consensusAddressCodec).
 		WithHomeDir(app.DefaultNodeHome).
-		WithViper("MINI") // env variable prefix
+		WithViper("MINI"). // env variable prefix
+		WithAddressPrefix(authConfig.Bech32Prefix).
+		WithValidatorPrefix(stakingConfig.Bech32PrefixValidator)
 
 	// Read the config again to overwrite the default values with the values from the config file
 	clientCtx, _ = config.ReadFromClientConfig(clientCtx)
