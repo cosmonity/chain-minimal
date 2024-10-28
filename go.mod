@@ -27,7 +27,7 @@ require (
 	cosmossdk.io/api v0.8.0
 	cosmossdk.io/client/v2 v2.0.0-20241003135820-1195a4468f06
 	cosmossdk.io/collections v0.4.1-0.20240802064046-23fac2f1b8ab
-	cosmossdk.io/core v1.0.0-alpha.4
+	cosmossdk.io/core v1.0.0-alpha.5
 	cosmossdk.io/depinject v1.0.0
 	cosmossdk.io/log v1.4.1
 	cosmossdk.io/store v1.1.1-0.20240909133312-50288938d1b6
