@@ -28,7 +28,7 @@ require (
 	cosmossdk.io/client/v2 v2.0.0-20241003135820-1195a4468f06
 	cosmossdk.io/collections v0.4.1-0.20240802064046-23fac2f1b8ab
 	cosmossdk.io/core v1.0.0-alpha.5
-	cosmossdk.io/depinject v1.0.0
+	cosmossdk.io/depinject v1.1.0
 	cosmossdk.io/log v1.4.1
 	cosmossdk.io/store v1.1.1-0.20240909133312-50288938d1b6
 	cosmossdk.io/tools/confix v0.1.2
@@ -198,7 +198,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240930140551-af27646dc61f // indirect
 	google.golang.org/grpc v1.67.1 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	google.golang.org/protobuf v1.35.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
