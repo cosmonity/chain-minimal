@@ -25,7 +25,7 @@ replace (
 
 require (
 	cosmossdk.io/api v0.8.0
-	cosmossdk.io/client/v2 v2.0.0-20241003135820-1195a4468f06
+	cosmossdk.io/client/v2 v2.0.0-beta.6
 	cosmossdk.io/collections v0.4.1-0.20240802064046-23fac2f1b8ab
 	cosmossdk.io/core v1.0.0-alpha.6
 	cosmossdk.io/depinject v1.1.0
@@ -53,7 +53,6 @@ require (
 	cosmossdk.io/math v1.4.0 // indirect
 	cosmossdk.io/schema v0.3.1-0.20240930054013-7c6e0388a3f9 // indirect
 	cosmossdk.io/x/epochs v0.0.0-20240522060652-a1ae4c3e0337 // indirect
-	cosmossdk.io/x/gov v0.0.0-20231113122742-912390d5fc4a // indirect
 	cosmossdk.io/x/tx v0.13.5 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
@@ -68,7 +67,6 @@ require (
 	github.com/bytedance/sonic v1.12.3 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
@@ -144,7 +142,6 @@ require (
 	github.com/linxGnu/grocksdb v1.9.3 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
