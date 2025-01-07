@@ -40,8 +40,8 @@ cosmossdk.io/x/epochs v0.0.0-20241218110910-47409028a73d h1:EkjwLMsu4nD8c1lfMY7B
 cosmossdk.io/x/epochs v0.0.0-20241218110910-47409028a73d/go.mod h1:F8AIIsAqDpWONRkIk6kOOtcTQ8rk/zsLCyaU34LacB8=
 cosmossdk.io/x/mint v0.2.0-rc.1 h1:UVglIphV0hPMbw4gvzoTarC2bBfCvoO+5IwF8aTJTO8=
 cosmossdk.io/x/mint v0.2.0-rc.1/go.mod h1:P0p3QyNURFCXsE6uMl2InA7UIxXEnQIOBKCO+ICnd1w=
-cosmossdk.io/x/staking v0.2.0-rc.1 h1:AZRGddRuuTaLxxpBvC7/TR7Dmt0pjziXWk13dC1beIo=
-cosmossdk.io/x/staking v0.2.0-rc.1/go.mod h1:7K4hgQ6tn0XLFb2BJ9oe8nEc4RkfQ4qHqgQy2b0kVNc=
+cosmossdk.io/x/staking v0.2.0-rc.1.0.20250107105448-4ed7118f793e h1:wVTftqVl1Rel16sKP55EfSMsBbfGYJQVrjATHkq+6YM=
+cosmossdk.io/x/staking v0.2.0-rc.1.0.20250107105448-4ed7118f793e/go.mod h1:eb4WWz3WB8lryUutt5pPuevwgqMSGsh0iPgr0VZr2kc=
 cosmossdk.io/x/tx v1.0.0 h1:pUUKRvHiMUZC/MnO8v747k1lUEA1DfAq0j0y0Mqrz/o=
 cosmossdk.io/x/tx v1.0.0/go.mod h1:AXYJ47btzkcWuT1OtA3M44dv1iiYbKomtopHEbQGgH4=
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=

@@ -26,7 +26,7 @@ require (
 	cosmossdk.io/x/consensus v0.2.0-rc.1
 	cosmossdk.io/x/distribution v0.2.0-rc.1
 	cosmossdk.io/x/mint v0.2.0-rc.1
-	cosmossdk.io/x/staking v0.2.0-rc.1
+	cosmossdk.io/x/staking v0.2.0-rc.1.0.20250107105448-4ed7118f793e
 	github.com/cometbft/cometbft v1.0.0
 	github.com/cometbft/cometbft/api v1.0.0
 	github.com/cosmos/cosmos-sdk v0.52.0
