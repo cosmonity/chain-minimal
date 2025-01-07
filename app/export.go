@@ -5,14 +5,12 @@ import (
 	"fmt"
 
 	cmtproto "github.com/cometbft/cometbft/api/cometbft/types/v1"
-	cmttypes "github.com/cometbft/cometbft/types"
 
 	"cosmossdk.io/collections"
 	storetypes "cosmossdk.io/store/types"
 	"cosmossdk.io/x/staking"
 	stakingtypes "cosmossdk.io/x/staking/types"
 
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -45,25 +43,10 @@ func (app *MiniApp) ExportAppStateAndValidators(
 	}
 
 	validators, err := staking.WriteValidators(ctx, app.StakingKeeper)
-	cmtValidators := []cmttypes.GenesisValidator{}
-	for _, val := range validators {
-		cmtPk, err := cryptocodec.ToCmtPubKeyInterface(val.PubKey)
-		if err != nil {
-			return servertypes.ExportedApp{}, err
-		}
-		cmtVal := cmttypes.GenesisValidator{
-			Address: val.Address.Bytes(),
-			PubKey:  cmtPk,
-			Power:   val.Power,
-			Name:    val.Name,
-		}
-
-		cmtValidators = append(cmtValidators, cmtVal)
-	}
 
 	return servertypes.ExportedApp{
 		AppState:        appState,
-		Validators:      cmtValidators,
+		Validators:      validators,
 		Height:          height,
 		ConsensusParams: app.BaseApp.GetConsensusParams(ctx),
 	}, err
