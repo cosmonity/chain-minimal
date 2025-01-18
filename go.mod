@@ -1,4 +1,4 @@
-module github.com/cosmosregistry/chain-minimal
+module github.com/cosmonity/chain-minimal
 
 go 1.23.4
 

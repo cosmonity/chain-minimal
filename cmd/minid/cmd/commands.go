@@ -28,7 +28,7 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
-	"github.com/cosmosregistry/chain-minimal/app"
+	"github.com/cosmonity/chain-minimal/app"
 )
 
 func initRootCmd(

@@ -5,7 +5,7 @@ It uses the least modules possible and is intended to be used as a starting poin
 
 `Minid` uses the **latest** version of the [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk).
 
-> This is an example module for the v0.52.x Cosmos SDK. Looking for the v0.50.x example? Check the [v0.50.x](https://github.com/cosmosregistry/chain-minimal/tree/v0.50.x) branch.
+> This is an example module for the v0.52.x Cosmos SDK. Looking for the v0.50.x example? Check the [v0.50.x](https://github.com/cosmonity/chain-minimal/tree/v0.50.x) branch.
 
 ## How to use
 
@@ -24,7 +24,7 @@ You are all set!
 Install and run `minid`:
 
 ```sh
-git clone git@github.com:cosmosregistry/chain-minimal.git
+git clone git@github.com:cosmonity/chain-minimal.git
 cd chain-minimal
 make install # install the minid binary
 make init # initialize the chain
