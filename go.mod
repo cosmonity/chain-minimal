@@ -1,4 +1,4 @@
-module github.com/cosmonity/chain-minimal
+module go.cosmonity.xyz/chain-minimal
 
 go 1.23.4
 
