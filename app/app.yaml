@@ -1,15 +1,15 @@
 modules:
   - name: runtime
     config:
-      "@type": cosmos.app.runtime.v1alpha1.Module
+      "@type": cosmos.app.runtime.v2.Module
       app_name: MiniApp
       # During begin block slashing happens after distr.BeginBlocker so that
       # there is nothing left over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
       # NOTE: staking module is required if HistoricalEntries param > 0
       begin_blockers: [distribution, staking]
       end_blockers: [staking]
-      # NOTE: The genutils module must occur after staking so that pools are properly initialized with tokens from genesis accounts.
-      # NOTE: The genutils module must also occur after auth so that it can access the params from auth.
+      # NOTE: The genutil module must occur after staking so that pools are properly initialized with tokens from genesis accounts.
+      # NOTE: The genutil module must also occur after auth so that it can access the params from auth.
       init_genesis:
         [consensus, accounts, auth, bank, distribution, staking, genutil]
       override_store_keys:
@@ -51,3 +51,6 @@ modules:
   - name: tx
     config:
       "@type": cosmos.tx.config.v1.Config
+  - name: validate
+    config:
+      "@type": cosmos.validate.module.v1.Module

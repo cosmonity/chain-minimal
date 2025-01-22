@@ -1,62 +1,181 @@
 package cmd
 
 import (
-	"errors"
+	"context"
 	"io"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+
+	"go.cosmonity.xyz/chain-minimal/app"
+
+	"go.cosmonity.xyz/evolve/runtime/v2"
+	serverv2 "go.cosmonity.xyz/evolve/server/v2"
+	grpcserver "go.cosmonity.xyz/evolve/server/v2/api/grpc"
+	"go.cosmonity.xyz/evolve/server/v2/api/grpcgateway"
+	"go.cosmonity.xyz/evolve/server/v2/api/rest"
+	"go.cosmonity.xyz/evolve/server/v2/cometbft"
+	serverstore "go.cosmonity.xyz/evolve/server/v2/store"
 
 	"cosmossdk.io/client/v2/offchain"
-	corestore "cosmossdk.io/core/store"
+	coreserver "cosmossdk.io/core/server"
+	"cosmossdk.io/core/transaction"
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
-	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
+	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/pruning"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
-	"github.com/cosmos/cosmos-sdk/client/snapshot"
-	"github.com/cosmos/cosmos-sdk/server"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
+	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
+	"github.com/cosmos/cosmos-sdk/version"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-
-	"go.cosmonity.xyz/chain-minimal/app"
+	genutilv2cli "github.com/cosmos/cosmos-sdk/x/genutil/v2/cli"
 )
 
-func initRootCmd(
+// commandDependencies is a struct that contains all the dependencies needed to initialize the root command.
+type commandDependencies[T transaction.Tx] struct {
+	GlobalConfig  coreserver.ConfigMap
+	TxConfig      client.TxConfig
+	ModuleManager *runtime.MM[T]
+	App           *app.MiniApp[T]
+	ClientContext client.Context
+}
+
+func initRootCmd[T transaction.Tx](
 	rootCmd *cobra.Command,
-	moduleManager *module.Manager,
-) {
+	logger log.Logger,
+	deps commandDependencies[T],
+) (serverv2.ConfigWriter, error) {
 	cfg := sdk.GetConfig()
 	cfg.Seal()
 
 	rootCmd.AddCommand(
-		genutilcli.InitCmd(moduleManager),
+		genutilcli.InitCmd(deps.ModuleManager),
+		genesisCommand(deps.ModuleManager, deps.App),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
-		pruning.Cmd(newApp),
-		snapshot.Cmd(newApp),
-	)
-
-	server.AddCommands(rootCmd, newApp, server.StartCmdOptions[servertypes.Application]{})
-
-	// add keybase, auxiliary RPC, query, genesis, and tx child commands
-	rootCmd.AddCommand(
-		server.StatusCommand(),
-		genutilcli.Commands(moduleManager.Modules[genutiltypes.ModuleName].(genutil.AppModule), moduleManager, appExport),
+		// add keybase, auxiliary RPC, query, genesis, and tx child commands
 		queryCommand(),
 		txCommand(),
 		keys.Commands(),
 		offchain.OffChain(),
+		version.NewVersionCommand(),
 	)
+
+	// build CLI skeleton for initial config parsing or a client application invocation
+	if deps.App == nil {
+		return serverv2.AddCommands[T](
+			rootCmd,
+			logger,
+			io.NopCloser(nil),
+			deps.GlobalConfig,
+			initServerConfig(),
+			cometbft.NewWithConfigOptions[T](initCometConfig()),
+			&grpcserver.Server[T]{},
+			&serverstore.Server[T]{},
+			&rest.Server[T]{},
+			&grpcgateway.Server[T]{},
+		)
+	}
+
+	// store component (not a server)
+	storeComponent, err := serverstore.New[T](deps.App.Store(), deps.GlobalConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// rest component
+	restServer, err := rest.New[T](logger, deps.App.AppManager, deps.GlobalConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// consensus component
+	consensusServer, err := cometbft.New(
+		logger,
+		deps.App.Name(),
+		deps.App.Store(),
+		deps.App.AppManager,
+		cometbft.AppCodecs[T]{
+			AppCodec:              deps.App.AppCodec(),
+			TxCodec:               &client.DefaultTxDecoder[T]{TxConfig: deps.TxConfig},
+			LegacyAmino:           deps.ClientContext.LegacyAmino,
+			ConsensusAddressCodec: deps.ClientContext.ConsensusAddressCodec,
+		},
+		deps.App.QueryHandlers(),
+		deps.App.SchemaDecoderResolver(),
+		cometbft.DefaultServerOptions[T](),
+		deps.GlobalConfig,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	grpcServer, err := grpcserver.New[T](
+		logger,
+		deps.App.InterfaceRegistry(),
+		deps.App.QueryHandlers(),
+		deps.App.Query,
+		deps.GlobalConfig,
+		grpcserver.WithExtraGRPCHandlers[T](
+			consensusServer.GRPCServiceRegistrar(
+				deps.ClientContext,
+				deps.GlobalConfig,
+			),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	grpcgatewayServer, err := grpcgateway.New[T](
+		logger,
+		deps.GlobalConfig,
+		deps.App.InterfaceRegistry(),
+		deps.App.AppManager,
+	)
+	if err != nil {
+		return nil, err
+	}
+	registerGRPCGatewayRoutes(deps.ClientContext, grpcgatewayServer)
+
+	// wire server commands
+	return serverv2.AddCommands[T](
+		rootCmd,
+		logger,
+		deps.App,
+		deps.GlobalConfig,
+		initServerConfig(),
+		consensusServer,
+		grpcServer,
+		storeComponent,
+		restServer,
+		grpcgatewayServer,
+	)
+}
+
+// genesisCommand builds genesis-related `simd genesis` command.
+func genesisCommand[T transaction.Tx](
+	moduleManager *runtime.MM[T],
+	app *app.MiniApp[T],
+) *cobra.Command {
+	var genTxValidator func([]transaction.Msg) error
+	if moduleManager != nil {
+		genTxValidator = moduleManager.Modules()[genutiltypes.ModuleName].(genutil.AppModule).GenTxValidator()
+	}
+	cmd := genutilv2cli.Commands(
+		genTxValidator,
+		moduleManager,
+		app,
+	)
+
+	return cmd
 }
 
 func queryCommand() *cobra.Command {
@@ -71,11 +190,9 @@ func queryCommand() *cobra.Command {
 
 	cmd.AddCommand(
 		rpc.WaitTxCmd(),
-		server.QueryBlockCmd(),
+		rpc.QueryEventForTxCmd(),
 		authcmd.QueryTxsByEventsCmd(),
-		server.QueryBlocksCmd(),
 		authcmd.QueryTxCmd(),
-		server.QueryBlockResultsCmd(),
 	)
 
 	return cmd
@@ -105,69 +222,13 @@ func txCommand() *cobra.Command {
 	return cmd
 }
 
-// newApp creates the application
-func newApp(
-	logger log.Logger,
-	db corestore.KVStoreWithBatch,
-	traceStore io.Writer,
-	appOpts servertypes.AppOptions,
-) servertypes.Application {
-	baseappOptions := server.DefaultBaseappOptions(appOpts)
-	app, err := app.NewMiniApp(logger, db, traceStore, true, appOpts, baseappOptions...)
-	if err != nil {
-		panic(err)
-	}
-
-	return app
-}
-
-// appExport creates a new simapp (optionally at a given height) and exports state.
-func appExport(
-	logger log.Logger,
-	db corestore.KVStoreWithBatch,
-	traceStore io.Writer,
-	height int64,
-	forZeroHeight bool,
-	jailAllowedAddrs []string,
-	appOpts servertypes.AppOptions,
-	modulesToExport []string,
-) (servertypes.ExportedApp, error) {
-	var (
-		miniApp *app.MiniApp
-		err     error
-	)
-
-	// this check is necessary as we use the flag in x/upgrade.
-	// we can exit more gracefully by checking the flag here.
-	homePath, ok := appOpts.Get(flags.FlagHome).(string)
-	if !ok || homePath == "" {
-		return servertypes.ExportedApp{}, errors.New("application home not set")
-	}
-
-	viperAppOpts, ok := appOpts.(*viper.Viper)
-	if !ok {
-		return servertypes.ExportedApp{}, errors.New("appOpts is not viper.Viper")
-	}
-
-	// overwrite the FlagInvCheckPeriod
-	viperAppOpts.Set(server.FlagInvCheckPeriod, 1)
-	appOpts = viperAppOpts
-
-	if height != -1 {
-		miniApp, err = app.NewMiniApp(logger, db, traceStore, false, appOpts)
-		if err != nil {
-			return servertypes.ExportedApp{}, err
-		}
-
-		if err := miniApp.LoadHeight(height); err != nil {
-			return servertypes.ExportedApp{}, err
-		}
-	} else {
-		miniApp, err = app.NewMiniApp(logger, db, traceStore, true, appOpts)
-		if err != nil {
-			return servertypes.ExportedApp{}, err
-		}
-	}
-
-	return miniApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
+// registerGRPCGatewayRoutes registers the gRPC gateway routes for all modules and other components
+func registerGRPCGatewayRoutes[T transaction.Tx](
+	clientContext client.Context,
+	server *grpcgateway.Server[T],
+) {
+	// those are the extra services that the CometBFT server implements (server/v2/cometbft/grpc.go)
+	cmtservice.RegisterGRPCGatewayRoutes(clientContext, server.GRPCGatewayRouter)
+	_ = nodeservice.RegisterServiceHandlerClient(context.Background(), server.GRPCGatewayRouter, nodeservice.NewServiceClient(clientContext))
+	_ = txtypes.RegisterServiceHandlerClient(context.Background(), server.GRPCGatewayRouter, txtypes.NewServiceClient(clientContext))
 }

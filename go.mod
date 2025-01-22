@@ -3,8 +3,7 @@ module go.cosmonity.xyz/chain-minimal
 go 1.23.4
 
 replace (
-	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.52.0-rc.1.0.20250107080912-2bcc7678255f
-
+	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.52.0-rc.1.0.20250122124702-a2fdd50b20bc
 	// Fix upstream GHSA-h395-qcrw-5vmq vulnerability.
 	// TODO Remove it: https://github.com/cosmos/cosmos-sdk/issues/10409
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.7.0
@@ -14,12 +13,10 @@ replace (
 
 require (
 	cosmossdk.io/api v0.8.2
-	cosmossdk.io/client/v2 v2.10.0-beta.1
-	cosmossdk.io/collections v1.0.0
+	cosmossdk.io/client/v2 v2.10.0-beta.2
 	cosmossdk.io/core v1.0.0
 	cosmossdk.io/depinject v1.1.0
 	cosmossdk.io/log v1.5.0
-	cosmossdk.io/store v1.10.0-rc.1.0.20241218084712-ca559989da43
 	cosmossdk.io/tools/confix v0.2.0-rc.2
 	cosmossdk.io/x/accounts v0.2.0-rc.1
 	cosmossdk.io/x/bank v0.2.0-rc.1
@@ -28,30 +25,38 @@ require (
 	cosmossdk.io/x/mint v0.2.0-rc.1
 	cosmossdk.io/x/staking v0.2.0-rc.1.0.20250107105448-4ed7118f793e
 	github.com/cometbft/cometbft v1.0.0
-	github.com/cometbft/cometbft/api v1.0.0
 	github.com/cosmos/cosmos-sdk v0.52.0
 	github.com/spf13/cobra v1.8.1
-	github.com/spf13/viper v1.19.0
+	github.com/spf13/pflag v1.0.5
+	go.cosmonity.xyz/evolve/runtime/v2 v2.0.0-00010101000000-000000000000
+	go.cosmonity.xyz/evolve/server/v2 v2.0.0-beta.1
+	go.cosmonity.xyz/evolve/server/v2/cometbft v0.0.0-00010101000000-000000000000
+	go.cosmonity.xyz/evolve/store/v2 v2.0.0-beta.1
 )
 
 require (
 	buf.build/gen/go/cometbft/cometbft/protocolbuffers/go v1.36.2-20241120201313-68e42a58b301.1 // indirect
 	buf.build/gen/go/cosmos/gogo-proto/protocolbuffers/go v1.36.2-20240130113600-88ef6483f90f.1 // indirect
+	cosmossdk.io/collections v1.0.0 // indirect
 	cosmossdk.io/core/testing v0.0.1 // indirect
 	cosmossdk.io/errors v1.0.1 // indirect
+	cosmossdk.io/errors/v2 v2.0.0 // indirect
 	cosmossdk.io/math v1.5.0 // indirect
 	cosmossdk.io/schema v1.0.0 // indirect
+	cosmossdk.io/store v1.10.0-rc.1.0.20241218084712-ca559989da43 // indirect
 	cosmossdk.io/x/epochs v0.0.0-20241218110910-47409028a73d // indirect
-	cosmossdk.io/x/tx v1.0.0 // indirect
+	cosmossdk.io/x/tx v1.0.1 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
 	github.com/DataDog/datadog-go v4.8.3+incompatible // indirect
 	github.com/DataDog/zstd v1.5.6 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
+	github.com/aybabtme/uniplot v0.0.0-20151203143629-039c559e5e7e // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.2.0 // indirect
+	github.com/bvinc/go-sqlite-lite v0.6.1 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -61,10 +66,11 @@ require (
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240816210425-c5d0cb0b6fc0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
-	github.com/cockroachdb/pebble v1.1.2 // indirect
+	github.com/cockroachdb/pebble v1.1.3 // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/cometbft/cometbft-db v1.0.1 // indirect
+	github.com/cometbft/cometbft/api v1.0.0 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-db v1.1.1 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5 // indirect
@@ -72,6 +78,7 @@ require (
 	github.com/cosmos/gogogateway v1.2.0 // indirect
 	github.com/cosmos/gogoproto v1.7.0 // indirect
 	github.com/cosmos/iavl v1.3.5 // indirect
+	github.com/cosmos/iavl/v2 v2.0.0-alpha.4 // indirect
 	github.com/cosmos/ics23/go v0.11.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.14.0 // indirect
 	github.com/creachadair/atomicfile v0.3.7 // indirect
@@ -123,6 +130,7 @@ require (
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
+	github.com/kocubinski/costor-api v1.1.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
@@ -146,7 +154,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.20.5 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.61.0 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -159,7 +167,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/viper v1.19.0 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/supranational/blst v0.3.13 // indirect
@@ -171,6 +179,8 @@ require (
 	github.com/zondax/ledger-go v1.0.0 // indirect
 	gitlab.com/yawning/secp256k1-voi v0.0.0-20230925100816-f2616030848b // indirect
 	gitlab.com/yawning/tuplehash v0.0.0-20230713102510-df83abbf9a02 // indirect
+	go.cosmonity.xyz/evolve/server/v2/appmanager v1.0.0-beta.2 // indirect
+	go.cosmonity.xyz/evolve/server/v2/stf v1.0.0-beta.2 // indirect
 	go.etcd.io/bbolt v1.4.0-alpha.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -188,11 +198,22 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20241015192408-796eee8c2d53 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/grpc v1.69.4 // indirect
-	google.golang.org/protobuf v1.36.2 // indirect
+	google.golang.org/protobuf v1.36.3 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
 	pgregory.net/rapid v1.1.0 // indirect
 	rsc.io/qr v0.2.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
+)
+
+// server v2 integration
+replace (
+	go.cosmonity.xyz/evolve/runtime/v2 => ../evolve/runtime/v2
+	go.cosmonity.xyz/evolve/server/v2 => ../evolve/server/v2
+	go.cosmonity.xyz/evolve/server/v2/appmanager => ../evolve/server/v2/appmanager
+	go.cosmonity.xyz/evolve/server/v2/cometbft => ../evolve/server/v2/cometbft
+	go.cosmonity.xyz/evolve/server/v2/stf => ../evolve/server/v2/stf
+	go.cosmonity.xyz/evolve/store/v2 => ../evolve/store/v2
+
 )
