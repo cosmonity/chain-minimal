@@ -209,11 +209,11 @@ require (
 
 // server v2 integration
 replace (
-	go.cosmonity.xyz/evolve/runtime/v2 => ../evolve/runtime/v2
-	go.cosmonity.xyz/evolve/server/v2 => ../evolve/server/v2
-	go.cosmonity.xyz/evolve/server/v2/appmanager => ../evolve/server/v2/appmanager
-	go.cosmonity.xyz/evolve/server/v2/cometbft => ../evolve/server/v2/cometbft
-	go.cosmonity.xyz/evolve/server/v2/stf => ../evolve/server/v2/stf
-	go.cosmonity.xyz/evolve/store/v2 => ../evolve/store/v2
+	go.cosmonity.xyz/evolve/runtime/v2 => go.cosmonity.xyz/evolve/runtime/v2 v2.0.0-20250122214239-0c40a522b097
+	go.cosmonity.xyz/evolve/server/v2 => go.cosmonity.xyz/evolve/server/v2 v2.0.0-20250122214239-0c40a522b097
+	go.cosmonity.xyz/evolve/server/v2/appmanager => go.cosmonity.xyz/evolve/server/v2/appmanager v0.0.0-20250122214239-0c40a522b097
+	go.cosmonity.xyz/evolve/server/v2/cometbft => go.cosmonity.xyz/evolve/server/v2/cometbft v0.0.0-20250122214239-0c40a522b097
+	go.cosmonity.xyz/evolve/server/v2/stf => go.cosmonity.xyz/evolve/server/v2/stf v0.0.0-20250122214239-0c40a522b097
+	go.cosmonity.xyz/evolve/store/v2 => go.cosmonity.xyz/evolve/store/v2 v2.0.0-20250122214239-0c40a522b097
 
 )
