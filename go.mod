@@ -14,7 +14,7 @@ replace (
 
 require (
 	cosmossdk.io/api v0.8.2
-	cosmossdk.io/client/v2 v2.10.0-beta.1
+	cosmossdk.io/client/v2 v2.10.0-beta.2
 	cosmossdk.io/collections v1.0.0
 	cosmossdk.io/core v1.0.0
 	cosmossdk.io/depinject v1.1.0
@@ -42,7 +42,7 @@ require (
 	cosmossdk.io/math v1.5.0 // indirect
 	cosmossdk.io/schema v1.0.0 // indirect
 	cosmossdk.io/x/epochs v0.0.0-20241218110910-47409028a73d // indirect
-	cosmossdk.io/x/tx v1.0.0 // indirect
+	cosmossdk.io/x/tx v1.0.1 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
@@ -188,7 +188,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20241015192408-796eee8c2d53 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/grpc v1.69.4 // indirect
-	google.golang.org/protobuf v1.36.2 // indirect
+	google.golang.org/protobuf v1.36.3 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
