@@ -189,7 +189,6 @@ func queryCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		rpc.WaitTxCmd(),
 		rpc.QueryEventForTxCmd(),
 		authcmd.QueryTxsByEventsCmd(),
 		authcmd.QueryTxCmd(),
