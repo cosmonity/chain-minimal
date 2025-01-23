@@ -3,13 +3,13 @@ package app
 import (
 	_ "embed"
 	"fmt"
-	"log"
 
 	"cosmossdk.io/core/registry"
 	"cosmossdk.io/core/server"
 	"cosmossdk.io/core/transaction"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/depinject/appconfig"
+	"cosmossdk.io/log"
 
 	_ "cosmossdk.io/api/cosmos/tx/config/v1" // import for side-effects
 	_ "cosmossdk.io/x/accounts"              // import for side-effects

@@ -41,7 +41,7 @@ func NewRootCmd[T transaction.Tx](args ...string) (*cobra.Command, error) {
 	}
 	factory, err := serverv2.NewCommandFactory(
 		serverv2.WithConfigWriter(configWriter),
-		serverv2.WithStdDefaultHomeDir(".simappv2"),
+		serverv2.WithStdDefaultHomeDir(".minid"),
 		serverv2.WithLoggerFactory(serverv2.NewLogger),
 	)
 	if err != nil {
@@ -61,6 +61,7 @@ func NewRootCmd[T transaction.Tx](args ...string) (*cobra.Command, error) {
 	if err = autoCliOpts.EnhanceRootCommand(rootCommand); err != nil {
 		return nil, err
 	}
+
 	subCommand, configMap, logger, err := factory.ParseCommand(rootCommand, args)
 	if err != nil {
 		if errors.Is(err, pflag.ErrHelp) {
@@ -165,6 +166,7 @@ func ProvideClientContext(
 	if !ok {
 		panic("registry.AminoRegistrar must be an *codec.LegacyAmino instance for legacy ClientContext")
 	}
+
 	homeDir, ok := configMap[serverv2.FlagHome].(string)
 	if !ok {
 		panic("server.ConfigMap must contain a string value for serverv2.FlagHome")
