@@ -1,8 +1,6 @@
 package app
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-)
+import sdk "github.com/cosmos/cosmos-sdk/types"
 
 const (
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address.

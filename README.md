@@ -3,10 +3,12 @@
 This repository contains an example of a tiny, but working Cosmos SDK chain.
 It uses the least modules possible and is intended to be used as a starting point for building your own chain, without all the boilerplate that other tools generate. It is a simpler version of Cosmos SDK's [simapp](https://github.com/cosmos/cosmos-sdk/tree/main/simapp).
 
-`Minid` uses the **latest** version of the [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk).
+`Minid` uses [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk) `v0.52.x` with the `v2` core layer.
 
 > [!NOTE]
-> This is an example module for the v0.52.x Cosmos SDK. Looking for the v0.50.x example? Check the [v0.50.x](https://github.com/cosmonity/chain-minimal/tree/v0.50.x) branch.
+> This is an example chain for the Cosmos SDK v2.
+> Looking for the v0.52.x example? Check the [v0.52.x](https://github.com/cosmonity/chain-minimal/tree/v0.52.x) branch.
+> Looking for the v0.50.x example? Check the [v0.50.x](https://github.com/cosmonity/chain-minimal/tree/v0.50.x) branch.
 
 ## How to use
 
@@ -39,4 +41,5 @@ If `minid` is not found, verify that your `$PATH` is configured correctly.
 
 ## Useful links
 
+* [Cosmos SDK v2 Community Fork](https://github.com/cosmonity/evolve)
 * [Cosmos-SDK Documentation](https://docs.cosmos.network/)

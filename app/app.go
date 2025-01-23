@@ -2,176 +2,162 @@ package app
 
 import (
 	_ "embed"
-	"io"
+	"fmt"
 
 	"cosmossdk.io/core/registry"
-	corestore "cosmossdk.io/core/store"
+	"cosmossdk.io/core/server"
+	"cosmossdk.io/core/transaction"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/depinject/appconfig"
 	"cosmossdk.io/log"
-	storetypes "cosmossdk.io/store/types"
 
 	_ "cosmossdk.io/api/cosmos/tx/config/v1" // import for side-effects
-	clienthelpers "cosmossdk.io/client/v2/helpers"
-	_ "cosmossdk.io/x/accounts"     // import for side-effects
-	_ "cosmossdk.io/x/bank"         // import for side-effects
-	_ "cosmossdk.io/x/consensus"    // import for side-effects
-	_ "cosmossdk.io/x/distribution" // import for side-effects
-	distrkeeper "cosmossdk.io/x/distribution/keeper"
-	_ "cosmossdk.io/x/mint"    // import for side-effects
-	_ "cosmossdk.io/x/staking" // import for side-effects
+	_ "cosmossdk.io/x/accounts"              // import for side-effects
+	_ "cosmossdk.io/x/bank"                  // import for side-effects
+	_ "cosmossdk.io/x/consensus"             // import for side-effects
+	_ "cosmossdk.io/x/distribution"          // import for side-effects
+	_ "cosmossdk.io/x/mint"                  // import for side-effects
+	_ "cosmossdk.io/x/staking"               // import for side-effects
 	stakingkeeper "cosmossdk.io/x/staking/keeper"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
+	"go.cosmonity.xyz/evolve/runtime/v2"
+	serverstore "go.cosmonity.xyz/evolve/server/v2/store"
+	"go.cosmonity.xyz/evolve/store/v2"
+	"go.cosmonity.xyz/evolve/store/v2/commitment/iavlv2"
+	"go.cosmonity.xyz/evolve/store/v2/root"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/runtime"
-	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/server/api"
-	"github.com/cosmos/cosmos-sdk/server/config"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/std"
 	_ "github.com/cosmos/cosmos-sdk/x/auth"           // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/validate"       // import for side-effects
 )
-
-// DefaultNodeHome default home directories for the application daemon
-var DefaultNodeHome string
 
 //go:embed app.yaml
 var AppConfigYAML []byte
 
-var (
-	_ runtime.AppI            = (*MiniApp)(nil)
-	_ servertypes.Application = (*MiniApp)(nil)
-)
-
-// MiniApp extends an ABCI application, but with most of its parameters exported.
-// They are exported for convenience in creating helper functions, as object
-// capabilities aren't needed for testing.
-type MiniApp struct {
-	*runtime.App
+// MiniApp is a minimalistic Cosmos SDK application.
+type MiniApp[T transaction.Tx] struct {
+	*runtime.App[T]
 	legacyAmino       registry.AminoRegistrar
 	appCodec          codec.Codec
 	txConfig          client.TxConfig
 	interfaceRegistry codectypes.InterfaceRegistry
+	store             store.RootStore
 
-	// keepers
+	// keepers (only keepers that are needed in the app commands)
 	StakingKeeper *stakingkeeper.Keeper
-	DistrKeeper   distrkeeper.Keeper
-
-	// simulation manager
-	sm *module.SimulationManager
-}
-
-func init() {
-	var err error
-	clienthelpers.EnvPrefix = "MINI"
-	DefaultNodeHome, err = clienthelpers.GetNodeHomeDirectory(".minid")
-	if err != nil {
-		panic(err)
-	}
 }
 
 // AppConfig returns the default app config.
+// Because core layer does not depend on the SDK anymore,
+// more dependencies need to be added here (instead of being previously abstracted by runtime).
 func AppConfig() depinject.Config {
 	return depinject.Configs(
 		appconfig.LoadYAML(AppConfigYAML),
+		runtime.DefaultServiceBindings(),
+		codec.DefaultProviders,
+		depinject.Provide(
+			ProvideRootStoreConfig,
+		),
+		depinject.Invoke(
+			std.RegisterInterfaces,
+			std.RegisterLegacyAminoCodec,
+		),
 	)
 }
 
-// NewMiniApp returns a reference to an initialized MiniApp.
-func NewMiniApp(
-	logger log.Logger,
-	db corestore.KVStoreWithBatch,
-	traceStore io.Writer,
-	loadLatest bool,
-	appOpts servertypes.AppOptions,
-	baseAppOptions ...func(*baseapp.BaseApp),
-) (*MiniApp, error) {
+// New returns a reference to an initialized MiniApp.
+func New[T transaction.Tx](
+	config depinject.Config,
+	outputs ...any,
+) (*MiniApp[T], error) {
 	var (
-		app        = &MiniApp{}
-		appBuilder *runtime.AppBuilder
+		app          = &MiniApp[T]{}
+		appBuilder   *runtime.AppBuilder[T]
+		logger       log.Logger
+		storeBuilder root.Builder
 	)
 
-	if err := depinject.Inject(
-		depinject.Configs(
-			AppConfig(),
-			depinject.Supply(
-				logger,
-				appOpts,
-			),
-		),
+	// merge AppConfig and other configuration in one config
+	appConfig := depinject.Configs(
+		AppConfig(),
+		config,
+	)
+
+	outputs = append(outputs,
+		&logger,
+		&storeBuilder,
 		&appBuilder,
 		&app.appCodec,
 		&app.legacyAmino,
 		&app.txConfig,
 		&app.interfaceRegistry,
 		&app.StakingKeeper,
-		&app.DistrKeeper,
-	); err != nil {
+	)
+
+	if err := depinject.Inject(appConfig, outputs...); err != nil {
 		return nil, err
 	}
 
-	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
-
-	// register streaming services
-	if err := app.RegisterStreamingServices(appOpts, app.kvStoreKeys()); err != nil {
+	var err error
+	app.App, err = appBuilder.Build()
+	if err != nil {
 		return nil, err
 	}
 
-	/****  Module Options ****/
+	app.store = storeBuilder.Get()
+	if app.store == nil {
+		return nil, fmt.Errorf("store builder did not return a db")
+	}
 
-	// create the simulation manager and define the order of the modules for deterministic simulations
-	// NOTE: this is not required apps that don't use the simulator for fuzz testing transactions
-	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, make(map[string]module.AppModuleSimulation, 0))
-	app.sm.RegisterStoreDecoders()
-
-	if err := app.Load(loadLatest); err != nil {
+	if err = app.LoadLatest(); err != nil {
 		return nil, err
 	}
 
 	return app, nil
 }
 
+// AppCodec returns MiniApp's codec.
+func (app *MiniApp[T]) AppCodec() codec.Codec {
+	return app.appCodec
+}
+
+// InterfaceRegistry returns MiniApp's InterfaceRegistry.
+func (app *MiniApp[T]) InterfaceRegistry() server.InterfaceRegistry {
+	return app.interfaceRegistry
+}
+
 // LegacyAmino returns MiniApp's amino codec.
-func (app *MiniApp) LegacyAmino() registry.AminoRegistrar {
+func (app *MiniApp[T]) LegacyAmino() registry.AminoRegistrar {
 	return app.legacyAmino
 }
 
-// GetKey returns the KVStoreKey for the provided store key.
-func (app *MiniApp) GetKey(storeKey string) *storetypes.KVStoreKey {
-	sk := app.UnsafeFindStoreKey(storeKey)
-	kvStoreKey, ok := sk.(*storetypes.KVStoreKey)
-	if !ok {
-		return nil
-	}
-	return kvStoreKey
+// Store returns the root store.
+func (app *MiniApp[T]) Store() store.RootStore {
+	return app.store
 }
 
-func (app *MiniApp) kvStoreKeys() map[string]*storetypes.KVStoreKey {
-	keys := make(map[string]*storetypes.KVStoreKey)
-	for _, k := range app.GetStoreKeys() {
-		if kv, ok := k.(*storetypes.KVStoreKey); ok {
-			keys[kv.Name()] = kv
-		}
+// Close overwrites the base Close method to close the stores.
+func (app *MiniApp[T]) Close() error {
+	if err := app.store.Close(); err != nil {
+		return err
 	}
 
-	return keys
+	return app.App.Close()
 }
 
-// SimulationManager implements the SimulationApp interface
-func (app *MiniApp) SimulationManager() *module.SimulationManager {
-	return app.sm
-}
-
-// RegisterAPIRoutes registers all application module routes with the provided
-// API server.
-func (app *MiniApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
-	app.App.RegisterAPIRoutes(apiSvr, apiConfig)
-	// register swagger API in app.go so that other applications can override easily
-	if err := server.RegisterSwaggerAPI(apiSvr.ClientCtx, apiSvr.Router, apiConfig.Swagger); err != nil {
-		panic(err)
+// ProvideRootStoreConfig provides the root store configuration.
+// The config is being read in app.go instead of being read earlier.
+func ProvideRootStoreConfig(config runtime.GlobalConfig) (*root.Config, error) {
+	cfg, err := serverstore.UnmarshalConfig(config)
+	if err != nil {
+		return nil, err
 	}
+	cfg.Options.IavlV2Config = iavlv2.DefaultConfig()
+	cfg.Options.IavlV2Config.MinimumKeepVersions = int64(cfg.Options.SCPruningOption.KeepRecent)
+	iavlv2.SetGlobalPruneLimit(1)
+	return cfg, err
 }
